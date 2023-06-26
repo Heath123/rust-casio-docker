@@ -1,0 +1,55 @@
+diff --git a/src/base.rs b/src/base.rs
+index dcd560b..233e3cd 100644
+--- a/src/base.rs
++++ b/src/base.rs
+@@ -92,28 +92,32 @@ pub fn compile_codegen_unit(tcx: TyCtxt<'_>, cgu_name: Symbol, supports_128bit_i
+         context.add_driver_option("-fexceptions");
+ 
+         // TODO(antoyo): only set on x86 platforms.
+-        context.add_command_line_option("-masm=intel");
++        // context.add_command_line_option("-masm=intel");
+         // TODO(antoyo): only add the following cli argument if the feature is supported.
+-        context.add_command_line_option("-msse2");
+-        context.add_command_line_option("-mavx2");
++        // context.add_command_line_option("-msse2");
++        // context.add_command_line_option("-mavx2");
+         // FIXME(antoyo): the following causes an illegal instruction on vmovdqu64 in std_example on my CPU.
+         // Only add if the CPU supports it.
+-        context.add_command_line_option("-msha");
+-        context.add_command_line_option("-mpclmul");
+-        context.add_command_line_option("-mfma");
+-        context.add_command_line_option("-mfma4");
+-        context.add_command_line_option("-m64");
+-        context.add_command_line_option("-mbmi");
+-        context.add_command_line_option("-mgfni");
++        // context.add_command_line_option("-msha");
++        // context.add_command_line_option("-mpclmul");
++        // context.add_command_line_option("-mfma");
++        // context.add_command_line_option("-mfma4");
++        // context.add_command_line_option("-m64");
++        // context.add_command_line_option("-mbmi");
++        // context.add_command_line_option("-mgfni");
+         //context.add_command_line_option("-mavxvnni"); // The CI doesn't support this option.
+-        context.add_command_line_option("-mf16c");
+-        context.add_command_line_option("-maes");
+-        context.add_command_line_option("-mxsavec");
+-        context.add_command_line_option("-mbmi2");
+-        context.add_command_line_option("-mrtm");
+-        context.add_command_line_option("-mvaes");
+-        context.add_command_line_option("-mvpclmulqdq");
+-        context.add_command_line_option("-mavx");
++        // context.add_command_line_option("-mf16c");
++        // context.add_command_line_option("-maes");
++        // context.add_command_line_option("-mxsavec");
++        // context.add_command_line_option("-mbmi2");
++        // context.add_command_line_option("-mrtm");
++        // context.add_command_line_option("-mvaes");
++        // context.add_command_line_option("-mvpclmulqdq");
++        // context.add_command_line_option("-mavx");
++
++        context.add_command_line_option("-m4a-nofpu");
++        context.add_command_line_option("-mb");
++        context.add_command_line_option("-fno-pie");
+ 
+         for arg in &tcx.sess.opts.cg.llvm_args {
+             context.add_command_line_option(arg);
