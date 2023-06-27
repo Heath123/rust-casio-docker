@@ -63,10 +63,7 @@ WORKDIR /usr/src/llvm/
 RUN git sparse-checkout set --no-cone compiler-rt
 RUN git checkout
 
-# Horrible hack: for some reason it tries to use the default as assembler so make that a symlink
-RUN ln -s /usr/local/cross/bin/sh3eb-elf-as /usr/local/bin/as
-
-# Horrible hack 2: it expects to use the mips-linux-gnu-gcc compiler so symlink that too
+# Horrible hack: it expects to use the mips-linux-gnu-gcc compiler so symlink it
 RUN ln -s /usr/local/cross/bin/sh3eb-elf-gcc /usr/local/bin/mips-linux-gnu-gcc
 
 # Compile rustc_codegen_gcc
