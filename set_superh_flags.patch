@@ -1,8 +1,8 @@
 diff --git a/src/base.rs b/src/base.rs
-index dcd560b..233e3cd 100644
+index dcd560b..cff036d 100644
 --- a/src/base.rs
 +++ b/src/base.rs
-@@ -92,28 +92,32 @@ pub fn compile_codegen_unit(tcx: TyCtxt<'_>, cgu_name: Symbol, supports_128bit_i
+@@ -92,28 +92,34 @@ pub fn compile_codegen_unit(tcx: TyCtxt<'_>, cgu_name: Symbol, supports_128bit_i
          context.add_driver_option("-fexceptions");
  
          // TODO(antoyo): only set on x86 platforms.
@@ -48,6 +48,8 @@ index dcd560b..233e3cd 100644
 +        // context.add_command_line_option("-mavx");
 +
 +        context.add_command_line_option("-m4a-nofpu");
++        context.add_driver_option("-Xassembler");
++        context.add_driver_option("--isa=sh4a-nofpu");
 +        context.add_command_line_option("-mb");
 +        context.add_command_line_option("-fno-pie");
  
