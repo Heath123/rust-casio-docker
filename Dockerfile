@@ -18,9 +18,18 @@ RUN ../binutils/configure --target=sh3eb-elf --prefix=/usr/local/cross --disable
 RUN make -j$(nproc)
 RUN make install
 
+# Delete binutils sources and build artifacts
+WORKDIR /usr/src/
+RUN rm -r binutils build-binutils
+
 # Download gcc
 WORKDIR /usr/src/
-RUN git clone https://github.com/antoyo/gcc --depth 1 --single-branch
+# Download a fixed commit to ensure reproducablity
+# Downloading as a zip instead of cloning is simpler and skips all the unneccesary git files
+RUN wget -O gcc.zip https://github.com/antoyo/gcc/archive/19869202b426021595b50781b0b0476a0c8d7036.zip
+RUN unzip gcc.zip
+RUN rm gcc.zip
+RUN mv gcc-* gcc
 
 # Patch GCC
 COPY bfloat_fix.patch bfloat_fix.patch
@@ -39,12 +48,13 @@ WORKDIR /usr/src/build-gcc
 RUN make all-target-libgcc -j$(nproc)
 RUN make install-target-libgcc
 
-# Download rustc_codegen_gcc
+# Delete gcc sources and build artifacts
 WORKDIR /usr/src/
-RUN git clone https://github.com/rust-lang/rustc_codegen_gcc --depth 1 --single-branch
+RUN rm -r gcc build-gcc
 
 # Get LLVM just for the compiler-rt part
 # TODO: Can this be skipped if using libgcc?
+# Also TODO: Try to fix it to a specific commit for reproducability
 WORKDIR /usr/src/
 # Do a sparse checkout to save disk space and download time
 # https://stackoverflow.com/a/52269934/4012708
@@ -52,6 +62,13 @@ RUN git clone -n --depth=1 --single-branch --filter=tree:0 https://github.com/ll
 WORKDIR /usr/src/llvm/
 RUN git sparse-checkout set --no-cone compiler-rt
 RUN git checkout
+
+# Download rustc_codegen_gcc
+WORKDIR /usr/src/
+RUN wget -O rustc_codegen_gcc.zip https://github.com/rust-lang/rustc_codegen_gcc/archive/1bbee3e217d75e7bc3bfe5d8c1b35e776fce96e6.zip
+RUN unzip rustc_codegen_gcc.zip
+RUN rm rustc_codegen_gcc.zip
+RUN mv rustc_codegen_gcc-* rustc_codegen_gcc
 
 # Patch rustc_codegen_gcc
 WORKDIR /usr/src/rustc_codegen_gcc/
@@ -75,6 +92,10 @@ RUN patch -t -p1 < ../ptr_size_fix.patch
 
 COPY disable_stdlib.patch ..
 RUN patch -t -p1 < ../disable_stdlib.patch
+
+# Install a wrapper script to fix an issue where Rust tries to link MIPS object files
+COPY sh-link-wrap.sh /usr/local/bin/sh-link-wrap
+RUN chmod +x /usr/local/bin/sh-link-wrap
 
 # Compile rustc_codegen_gcc
 WORKDIR /usr/src/rustc_codegen_gcc/
