@@ -1,0 +1,13 @@
+diff --git a/cargo.sh b/cargo.sh
+index 16e49b2..0e517c9 100755
+--- a/cargo.sh
++++ b/cargo.sh
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env bash
+ 
+ if [ -z $CHANNEL ]; then
+-export CHANNEL='debug'
++export CHANNEL='release'
+ fi
+ 
+ pushd $(dirname "$0") >/dev/null

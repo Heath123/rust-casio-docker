@@ -1,0 +1,18 @@
+{
+  "arch": "mips",
+  "data-layout": "E-m:m-p:32:32-i8:8:32-i16:16:32-i64:64-n32-S64",
+  "env": "gnu",
+  "has-rpath": true,
+  "llvm-target": "mips-unknown-linux-gnu",
+  "max-atomic-width": 64,
+  "position-independent-executables": false,
+  "panic-strategy": "abort",
+  "linker-flavor": "gcc",
+  "linker": "sh3eb-elf-gcc",
+  "split-debuginfo": "off",
+  "target-endian": "big",
+  "late-link-args": {
+    "gcc": ["-ffreestanding", "-nostdlib"]
+  },
+  "target-pointer-width": "32"
+}

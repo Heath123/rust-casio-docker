@@ -11,4 +11,4 @@ source config.sh
 popd >/dev/null
 
 echo $RUSTC
-$RUSTC --target $TARGET_TRIPLE "$@"
+$RUSTC --target $TARGET_JSON "$@"

@@ -1,0 +1,17 @@
+diff --git a/build_sysroot/build_sysroot.sh b/build_sysroot/build_sysroot.sh
+index 9d692d5..71db085 100755
+--- a/build_sysroot/build_sysroot.sh
++++ b/build_sysroot/build_sysroot.sh
+@@ -19,10 +19,10 @@ rm -r sysroot/ 2>/dev/null || true
+ export RUSTFLAGS="$RUSTFLAGS -Z force-unstable-if-unmarked"
+ if [[ "$1" == "--release" ]]; then
+     sysroot_channel='release'
+-    RUSTFLAGS="$RUSTFLAGS -Zmir-opt-level=3" cargo build --target $TARGET_TRIPLE --release
++    RUSTFLAGS="$RUSTFLAGS -Zmir-opt-level=3" cargo build --target $TARGET_JSON --release
+ else
+     sysroot_channel='debug'
+-    cargo build --target $TARGET_TRIPLE --features compiler_builtins/c
++    cargo build --target $TARGET_JSON --features compiler_builtins/c
+ fi
+ 
+ # Copy files to sysroot

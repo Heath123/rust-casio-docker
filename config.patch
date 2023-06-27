@@ -1,5 +1,5 @@
 diff --git a/config.sh b/config.sh
-index 166e839..f290f82 100644
+index 166e839..940d4e4 100644
 --- a/config.sh
 +++ b/config.sh
 @@ -21,14 +21,14 @@ fi
@@ -8,14 +8,15 @@ index 166e839..f290f82 100644
  TARGET_TRIPLE=$HOST_TRIPLE
 -#TARGET_TRIPLE="m68k-unknown-linux-gnu"
 +TARGET_TRIPLE="sh3eb-elf"
++TARGET_JSON="/usr/src/rustc_codegen_gcc/sh3eb-elf.json"
  
  linker=''
  RUN_WRAPPER=''
  if [[ "$HOST_TRIPLE" != "$TARGET_TRIPLE" ]]; then
 -   if [[ "$TARGET_TRIPLE" == "m68k-unknown-linux-gnu" ]]; then
-+   if [[ "$TARGET_TRIPLE" == "sh3eb-elf" ]]; then
-        TARGET_TRIPLE="mips-unknown-linux-gnu"
+-       TARGET_TRIPLE="mips-unknown-linux-gnu"
 -       linker='-Clinker=m68k-linux-gcc'
++   if [[ "$TARGET_TRIPLE" == "sh3eb-elf" ]]; then
 +       linker='-Clinker=sh3eb-elf-gcc'
     elif [[ "$TARGET_TRIPLE" == "aarch64-unknown-linux-gnu" ]]; then
        # We are cross-compiling for aarch64. Use the correct linker and run tests in qemu.

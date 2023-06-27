@@ -34,24 +34,14 @@ RUN ../gcc/./configure --target=sh3eb-elf --prefix=/usr/local/cross --disable-nl
 RUN make all-gcc -j$(nproc)
 RUN make install-gcc
 
+# Compile libgcc
+WORKDIR /usr/src/build-gcc
+RUN make all-target-libgcc -j$(nproc)
+RUN make install-target-libgcc
+
 # Download rustc_codegen_gcc
 WORKDIR /usr/src/
 RUN git clone https://github.com/rust-lang/rustc_codegen_gcc --depth 1 --single-branch
-
-# Patch rustc_codegen_gcc
-WORKDIR /usr/src/rustc_codegen_gcc/
-
-COPY config.patch ../config.patch
-RUN patch -t -p1 < ../config.patch
-
-COPY set_superh_flags.patch ..
-RUN patch -t -p1 < ../set_superh_flags.patch
-
-COPY ptr_size_fix.patch ..
-RUN patch -t -p1 < ../ptr_size_fix.patch
-
-COPY disable_stdlib.patch ..
-RUN patch -t -p1 < ../disable_stdlib.patch
 
 # Get LLVM just for the compiler-rt part
 # TODO: Can this be skipped if using libgcc?
@@ -63,8 +53,28 @@ WORKDIR /usr/src/llvm/
 RUN git sparse-checkout set --no-cone compiler-rt
 RUN git checkout
 
-# Horrible hack: it expects to use the mips-linux-gnu-gcc compiler so symlink it
-RUN ln -s /usr/local/cross/bin/sh3eb-elf-gcc /usr/local/bin/mips-linux-gnu-gcc
+# Patch rustc_codegen_gcc
+WORKDIR /usr/src/rustc_codegen_gcc/
+
+COPY sh3eb-elf.json .
+
+COPY config.patch ..
+RUN patch -t -p1 < ../config.patch
+
+COPY use_target_json.patch ..
+RUN patch -t -p1 < ../use_target_json.patch
+
+COPY cargo_release_by_default.patch ..
+RUN patch -t -p1 < ../cargo_release_by_default.patch
+
+COPY set_superh_flags.patch ..
+RUN patch -t -p1 < ../set_superh_flags.patch
+
+COPY ptr_size_fix.patch ..
+RUN patch -t -p1 < ../ptr_size_fix.patch
+
+COPY disable_stdlib.patch ..
+RUN patch -t -p1 < ../disable_stdlib.patch
 
 # Compile rustc_codegen_gcc
 WORKDIR /usr/src/rustc_codegen_gcc/
