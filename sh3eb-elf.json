@@ -8,7 +8,7 @@
   "position-independent-executables": false,
   "panic-strategy": "abort",
   "linker-flavor": "gcc",
-  "linker": "sh3eb-elf-gcc",
+  "linker": "sh-link-wrap",
   "split-debuginfo": "off",
   "target-endian": "big",
   "late-link-args": {

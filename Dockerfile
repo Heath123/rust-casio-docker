@@ -1,56 +1,27 @@
 FROM rustlang/rust:nightly
 
 # Install dependencies
-RUN apt update
-RUN apt install -y texinfo libgmp3-dev libmpc-dev libmpfr-dev bison flex
+RUN apt-get update
+RUN apt-get install -y texinfo libgmp3-dev libmpc-dev libmpfr-dev bison flex cmake
+# TODO: Try to prune these down a bit
+RUN apt-get install python3-pil libusb-1.0-0-dev libudev-dev libsdl2-dev libpng-dev libudisks2-dev libglib2.0-dev libppl-dev -y
 
-# Download binutils
-WORKDIR /usr/src/
-RUN wget https://ftp.gnu.org/gnu/binutils/binutils-2.40.tar.gz
-RUN tar -xzf binutils-2.40.tar.gz
-RUN mv binutils-2.40 binutils
+# Install 
+# TODO: Fix giteapc and everything installed with it to a specific commit for reproducability
+ENV PATH="/root/.local/bin:$PATH"
+WORKDIR /tmp/giteapc-install
+RUN curl "https://gitea.planet-casio.com/Lephenixnoir/GiteaPC/archive/master.tar.gz" -o giteapc-master.tar.gz
+RUN tar -xzf giteapc-master.tar.gz
+WORKDIR /tmp/giteapc-install/giteapc
+RUN python3 giteapc.py install Lephenixnoir/GiteaPC -y
 
-# Install binutils
-WORKDIR /usr/src/build-binutils
-RUN mkdir -p /usr/local/cross
-ENV PATH="${PATH}:/usr/local/cross/bin/"
-RUN ../binutils/configure --target=sh3eb-elf --prefix=/usr/local/cross --disable-nls
-RUN make -j$(nproc)
-RUN make install
-
-# Delete binutils sources and build artifacts
-WORKDIR /usr/src/
-RUN rm -r binutils build-binutils
-
-# Download gcc
-WORKDIR /usr/src/
-# Download a fixed commit to ensure reproducablity
-# Downloading as a zip instead of cloning is simpler and skips all the unneccesary git files
-RUN wget -O gcc.zip https://github.com/antoyo/gcc/archive/19869202b426021595b50781b0b0476a0c8d7036.zip
-RUN unzip gcc.zip
-RUN rm gcc.zip
-RUN mv gcc-* gcc
-
-# Patch GCC
-COPY bfloat_fix.patch bfloat_fix.patch
-WORKDIR /usr/src/gcc/
-RUN patch -t -p1 < ../bfloat_fix.patch
-WORKDIR /usr/src/
-
-# Compile GCC
-WORKDIR /usr/src/build-gcc
-RUN ../gcc/./configure --target=sh3eb-elf --prefix=/usr/local/cross --disable-nls --enable-languages=c,jit,c++ --without-headers --enable-host-shared --disable-bootstrap
-RUN make all-gcc -j$(nproc)
-RUN make install-gcc
-
-# Compile libgcc
-WORKDIR /usr/src/build-gcc
-RUN make all-target-libgcc -j$(nproc)
-RUN make install-target-libgcc
-
-# Delete gcc sources and build artifacts
-WORKDIR /usr/src/
-RUN rm -r gcc build-gcc
+# Install the C/C++ SDK and compiler
+RUN giteapc install Lephenixnoir/fxsdk:noudisks2 Lephenixnoir/sh-elf-binutils -y
+RUN giteapc install Lephenixnoir/sh-elf-gcc@rustc-codegen:clean -y
+# Install libm and libc, then go back to the cimpiler for libstdc++
+RUN giteapc install Lephenixnoir/OpenLibm Vhex-Kernel-Core/fxlibc Lephenixnoir/sh-elf-gcc -y
+# Now get gint
+RUN giteapc install Lephenixnoir/gint -y
 
 # Get LLVM just for the compiler-rt part
 # TODO: Can this be skipped if using libgcc?
@@ -93,14 +64,14 @@ RUN patch -t -p1 < ../ptr_size_fix.patch
 COPY disable_stdlib.patch ..
 RUN patch -t -p1 < ../disable_stdlib.patch
 
-# Install a wrapper script to fix an issue where Rust tries to link MIPS object files
+# # Install a wrapper script to fix an issue where Rust tries to link MIPS object files
 COPY sh-link-wrap.sh /usr/local/bin/sh-link-wrap
 RUN chmod +x /usr/local/bin/sh-link-wrap
 
 # Compile rustc_codegen_gcc
 WORKDIR /usr/src/rustc_codegen_gcc/
 ENV RUST_COMPILER_RT_ROOT="/usr/src/llvm/compiler-rt"
-RUN echo /usr/local/cross/lib/ > gcc_path
+RUN echo /root/.local/share/fxsdk/sysroot/lib/ > gcc_path
 RUN ./prepare_build.sh
 RUN LIBRARY_PATH=$(cat gcc_path) LD_LIBRARY_PATH=$(cat gcc_path) PATH=/usr/local/bin/:$PATH:/usr/local/bin/ ./build.sh --release
 

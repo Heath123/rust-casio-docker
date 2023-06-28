@@ -12,7 +12,7 @@ change_header() {
 }
 
 # Main script
-wrapped_linker="sh3eb-elf-gcc"
+wrapped_linker="sh-elf-gcc"
 
 processed_args=()
 for arg in "$@"; do

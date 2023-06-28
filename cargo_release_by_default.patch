@@ -11,3 +11,4 @@ index 16e49b2..0e517c9 100755
  fi
  
  pushd $(dirname "$0") >/dev/null
+ 
